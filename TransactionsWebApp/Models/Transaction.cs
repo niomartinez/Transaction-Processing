@@ -16,6 +16,8 @@ namespace Transaction_Processing.Models
         public string TransIdentifier { get; set; }
         public decimal Amount { get; set; }
         [DataType(DataType.Currency)]
+        [Required]
+        [Range(3,3)]
         public string Currency { get; set; }
         [DataType(DataType.DateTime)]
         public DateTime TransDate { get; set; }
