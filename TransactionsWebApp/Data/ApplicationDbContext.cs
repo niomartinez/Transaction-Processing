@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Transaction_Processing.Models;
 
 namespace TransactionsWebApp.Data
 {
@@ -12,5 +13,6 @@ namespace TransactionsWebApp.Data
             : base(options)
         {
         }
+        public DbSet<Transaction_Processing.Models.Transaction> Transaction { get; set; }
     }
 }
