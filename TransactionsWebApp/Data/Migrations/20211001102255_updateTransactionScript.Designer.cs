@@ -11,7 +11,7 @@ namespace TransactionsWebApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20211001102255_updateTransactionScript")]
-    partial class updateTransactionScript
+    partial class UpdateTransactionScript
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

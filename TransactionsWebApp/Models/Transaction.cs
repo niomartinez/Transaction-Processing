@@ -9,8 +9,7 @@ namespace Transaction_Processing.Models
 {
     public class Transaction
     {
-        public int Id { get; set; }
-
+        [Key]
         [Required]
         [StringLength(50, ErrorMessage = "Maximum length is 50")]
         public string TransIdentifier { get; set; }
@@ -30,4 +29,14 @@ namespace Transaction_Processing.Models
 
         }
     }
+
+    enum CsvStatuses
+    {
+        Approved, Failed, Finished
+    }
+    enum XmlStatuses
+    {
+        Approved, Rejected, Done
+    }
+
 }

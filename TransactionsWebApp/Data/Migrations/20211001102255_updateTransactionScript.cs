@@ -2,7 +2,7 @@
 
 namespace TransactionsWebApp.Data.Migrations
 {
-    public partial class updateTransactionScript : Migration
+    public partial class UpdateTransactionScript : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

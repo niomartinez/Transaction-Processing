@@ -11,7 +11,7 @@ namespace TransactionsWebApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20211001101638_initialsetup")]
-    partial class initialsetup
+    partial class Initialsetup
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

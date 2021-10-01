@@ -4,11 +4,22 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Transactions Service</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <label>Browse File</label>
+    <input type="file" name="file"/>
+    <span style="display: block; margin-top: 5px; color: gray; font-size: 10px;">(Note: Max file size is 1 MB. File extension should be csv or xml only.)</span>
+    <button type="submit" name="btnFilter" id="btnFilter" value="1" class="btn btn-default" style="margin: 5px 0;">Upload</button>
+
+    if (ViewBag.ValidationMessageForAttachment != null)
+    {
+        <div id="divMsgAtt">
+            <span class="field-validation-error text-danger">@ViewBag.ValidationMessageForAttachment</span>
+        </div>
+    }
+}
 <table class="table">
     <thead>
         <tr>
@@ -31,29 +42,30 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TransIdentifier)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Currency)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TransDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TransIdentifier)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Currency)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TransDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.TransIdentifier">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.TransIdentifier">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.TransIdentifier">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Transaction_Processing.Models;
 using TransactionsWebApp.Data;
+using TransactionsWebApp.Helpers.ClassMappers;
 
 namespace TransactionsWebApp.Controllers
 {
@@ -25,129 +32,72 @@ namespace TransactionsWebApp.Controllers
             return View(await _context.Transaction.ToListAsync());
         }
 
-        // GET: Transactions/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult UploadFile(IFormFile file)
         {
-            if (id == null)
+            List<Transaction> transactions = new();
+            //read File
+            #region Read CSV
+            var path = file.OpenReadStream();
+            CsvConfiguration csvConfiguration = new(CultureInfo.InvariantCulture)
             {
-                return NotFound();
-            }
-
-            var transaction = await _context.Transaction
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (transaction == null)
+                HasHeaderRecord = false
+            };
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, csvConfiguration))
             {
-                return NotFound();
+                csv.Context.RegisterClassMap<TransactionsMap>();
+                while (csv.Read())
+                {
+                    var transaction = csv.GetRecord<Transaction>();
+                    transactions.Add(transaction);
+                }
             }
+            #endregion
 
-            return View(transaction);
-        }
-
-        // GET: Transactions/Create
-        public IActionResult Create()
-        {
+            //Validate File columns per row
+            //if no validations return http 200 and insert to DB
+            //if has validations list validations and note file name to a log file and display validations on bad request
             return View();
         }
-
-        // POST: Transactions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,TransIdentifier,Amount,Currency,TransDate,Status")] Transaction transaction)
+        #region Validate CSV
+        public void ValidateCsv(string fileContents)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(transaction);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(transaction);
+            var fileLines = fileContents.Split(
+                  new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            if (fileLines.Length < 2)
+                //fail - no data row.
+
+                ValidateColumnHeader(fileLines[0]);
+
+            ValidateRows(fileLines.Skip(1));
         }
 
-        // GET: Transactions/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public bool ValidateColumnHeader(string header)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var transaction = await _context.Transaction.FindAsync(id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
-            return View(transaction);
+            return header.Trim().Replace(' ', (char)0).ToLower() ==
+               "TransactionIdentificator,Amount,CurrencyCode,TransactionDate,Status";
         }
 
-        // POST: Transactions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TransIdentifier,Amount,Currency,TransDate,Status")] Transaction transaction)
+        public bool ValidateRows(IEnumerable<string> rows)
         {
-            if (id != transaction.Id)
+            foreach (var row in rows)
             {
-                return NotFound();
+                var cells = row.Split(',');
+
+                //check if the number of cells is correct
+                if (cells.Length != 4)
+                    return false;
+
+                //ensure gender is correct
+                if (cells[3] != "M" && cells[3] != "F")
+                    return false;
+
+                //perform any additional row checks relevant to your domain
             }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TransactionExists(transaction.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(transaction);
+            return true;
         }
-
-        // GET: Transactions/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var transaction = await _context.Transaction
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
-
-            return View(transaction);
-        }
-
-        // POST: Transactions/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var transaction = await _context.Transaction.FindAsync(id);
-            _context.Transaction.Remove(transaction);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool TransactionExists(int id)
-        {
-            return _context.Transaction.Any(e => e.Id == id);
-        }
+        #endregion
+        
     }
 }
