@@ -1,29 +1,30 @@
-﻿using System;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CsvHelper;
-using CsvHelper.Configuration;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Transaction_Processing.Models;
 using TransactionsWebApp.Data;
 using TransactionsWebApp.Helpers.ClassMappers;
+using TransactionsWebApp.Helpers.LogService;
+using Newtonsoft.Json;
 
 namespace TransactionsWebApp.Controllers
 {
     public class TransactionsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        readonly Logger _logger;
 
-        public TransactionsController(ApplicationDbContext context)
+        public TransactionsController(Logger logger)
         {
-            _context = context;
+            _logger = logger;
         }
 
         // GET: Transactions
@@ -32,7 +33,7 @@ namespace TransactionsWebApp.Controllers
             return View(await _context.Transaction.ToListAsync());
         }
 
-        public IActionResult UploadFile(IFormFile file)
+        public IActionResult UploadFile(IFormFile file, Transaction transactionModel)
         {
             List<Transaction> transactions = new();
             //read File
@@ -40,64 +41,77 @@ namespace TransactionsWebApp.Controllers
             var path = file.OpenReadStream();
             CsvConfiguration csvConfiguration = new(CultureInfo.InvariantCulture)
             {
-                HasHeaderRecord = false
+                HasHeaderRecord = false, Delimiter = ","
             };
             using (var reader = new StreamReader(path))
             using (var csv = new CsvReader(reader, csvConfiguration))
             {
                 csv.Context.RegisterClassMap<TransactionsMap>();
-                while (csv.Read())
-                {
-                    var transaction = csv.GetRecord<Transaction>();
-                    transactions.Add(transaction);
-                }
+                transactions = csv.GetRecords<Transaction>().ToList();
             }
             #endregion
 
             //Validate File columns per row
+            int counter = 1;
+            foreach (Transaction trans in transactions)
+            {
+
+                ValidateTransaction(trans, file,  counter);
+                //transactionModel.TransIdentifier = trans.TransIdentifier;
+                //transactionModel.Amount = trans.Amount;
+                //transactionModel.Currency = trans.Currency;
+                //transactionModel.TransDate = trans.TransDate;
+                //transactionModel.Status = trans.Status;
+                counter++;
+            }
             //if no validations return http 200 and insert to DB
             //if has validations list validations and note file name to a log file and display validations on bad request
             return View();
         }
-        #region Validate CSV
-        public void ValidateCsv(string fileContents)
+        #region Validate CSV Records
+        public (bool, List<string>) ValidateTransaction(Transaction trans, IFormFile file, int counter)
         {
-            var fileLines = fileContents.Split(
-                  new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-
-            if (fileLines.Length < 2)
-                //fail - no data row.
-
-                ValidateColumnHeader(fileLines[0]);
-
-            ValidateRows(fileLines.Skip(1));
-        }
-
-        public bool ValidateColumnHeader(string header)
-        {
-            return header.Trim().Replace(' ', (char)0).ToLower() ==
-               "TransactionIdentificator,Amount,CurrencyCode,TransactionDate,Status";
-        }
-
-        public bool ValidateRows(IEnumerable<string> rows)
-        {
-            foreach (var row in rows)
+            List<string> validations = new();
+            bool hasValidation = false;
+            string valMsg;
+            //TransIdentifier char is > 50
+            if (trans.TransIdentifier.Length > 50)
             {
-                var cells = row.Split(',');
-
-                //check if the number of cells is correct
-                if (cells.Length != 4)
-                    return false;
-
-                //ensure gender is correct
-                if (cells[3] != "M" && cells[3] != "F")
-                    return false;
-
-                //perform any additional row checks relevant to your domain
+                valMsg = "Transaction Identifier exceeded maximum of 50 characters.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
             }
-            return true;
+            //TransIdentifier is Null, Empty, Or whitespace
+            if (string.IsNullOrWhiteSpace(trans.TransIdentifier) || string.IsNullOrEmpty(trans.TransIdentifier))
+            {
+                valMsg = "Transaction Identifier is blank or empty.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+
+            if (!decimal.TryParse(trans.Amount.ToString(), out _))
+            {
+                valMsg = "Amount is not in a decimal format.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            return (hasValidation, validations);
+        }
+
+
+
+        #endregion
+
+        #region logging
+        private void Log(Transaction trans, string valMsg, IFormFile file, int counter)
+        {
+            _logger.Log("Invalid Record from File " + file.FileName + ": " + Environment.NewLine +
+                       "Exception: " + valMsg + " on row: " + counter + Environment.NewLine +
+                       JsonConvert.SerializeObject(trans) + Environment.NewLine);
         }
         #endregion
-        
     }
 }

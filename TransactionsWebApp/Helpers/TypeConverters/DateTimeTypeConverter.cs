@@ -10,7 +10,7 @@ namespace TransactionsWebApp.Helpers.TypeConverters
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
             string s = text.Replace("\"", "");
-            System.DateTime date = System.DateTime.ParseExact(text.Substring(1, text.Length - 2), "dd/MM/yyyy hh:mm:ss", null);
+            System.DateTime date = System.DateTime.ParseExact(s, "dd/MM/yyyy hh:mm:ss", null);
             return date;
         }
 

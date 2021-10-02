@@ -8,8 +8,8 @@ namespace TransactionsWebApp.Helpers.TypeConverters
     {
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
-            string s = text.Replace("\"", "");
-            string str = s.Replace(" ", "");
+            string s = text.Replace("\"", string.Empty).Trim();
+            string str = s.Replace(" ", string.Empty).Trim();
             return decimal.Parse(str);
         }
 

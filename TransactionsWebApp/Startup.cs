@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TransactionsWebApp.Data;
+using TransactionsWebApp.Helpers.Utilities;
 
 namespace TransactionsWebApp
 {
@@ -35,6 +36,8 @@ namespace TransactionsWebApp
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
+
+            services.Configure<AppSettingsModel>(Configuration.GetSection("ApplicationSettings"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
