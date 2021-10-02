@@ -18,8 +18,8 @@ namespace Transaction_Processing.Models
         [Required]
         [Range(3,3)]
         public string Currency { get; set; }
-        [DataType(DataType.DateTime)]
-        public DateTime TransDate { get; set; }
+        [Required]
+        public string TransDate { get; set; }
 
         [Required]
         public string Status { get; set; }

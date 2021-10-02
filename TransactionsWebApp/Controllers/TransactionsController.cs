@@ -22,7 +22,7 @@ namespace TransactionsWebApp.Controllers
         private readonly ApplicationDbContext _context;
         readonly Logger _logger;
 
-        public TransactionsController(Logger logger)
+        public TransactionsController(ILogger logger)
         {
             _logger = logger;
         }
@@ -74,23 +74,31 @@ namespace TransactionsWebApp.Controllers
             List<string> validations = new();
             bool hasValidation = false;
             string valMsg;
-            //TransIdentifier char is > 50
-            if (trans.TransIdentifier.Length > 50)
-            {
-                valMsg = "Transaction Identifier exceeded maximum of 50 characters.";
-                Log(trans, valMsg, file, counter);
-                validations.Add(valMsg);
-                hasValidation = true;
-            }
             //TransIdentifier is Null, Empty, Or whitespace
-            if (string.IsNullOrWhiteSpace(trans.TransIdentifier) || string.IsNullOrEmpty(trans.TransIdentifier))
+            if (string.IsNullOrWhiteSpace(trans.TransIdentifier.ToString()) || string.IsNullOrEmpty(trans.TransIdentifier.ToString()))
             {
                 valMsg = "Transaction Identifier is blank or empty.";
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
             }
-
+            //TransIdentifier char is > 50
+            if (trans.TransIdentifier.ToString().Length > 50)
+            {
+                valMsg = "Transaction Identifier exceeded maximum of 50 characters.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //Amount is Null, Empty, Or whitespace
+            if (string.IsNullOrWhiteSpace(trans.Amount.ToString()) || string.IsNullOrEmpty(trans.Amount.ToString()))
+            {
+                valMsg = "Amount is blank or empty.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //Amount is not in decimal format
             if (!decimal.TryParse(trans.Amount.ToString(), out _))
             {
                 valMsg = "Amount is not in a decimal format.";
@@ -98,6 +106,62 @@ namespace TransactionsWebApp.Controllers
                 validations.Add(valMsg);
                 hasValidation = true;
             }
+            //Currency is Null, Empty, Or whitespace
+            if (string.IsNullOrWhiteSpace(trans.Currency.ToString()) || string.IsNullOrEmpty(trans.Currency.ToString()))
+            {
+                valMsg = "Currency is blank or empty.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //Currency is not in ISO4217 format
+            IEnumerable<string> currencySymbols = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                    .Select(x => (new RegionInfo(x.LCID)).ISOCurrencySymbol)
+                    .Distinct()
+                    .OrderBy(x => x);
+
+            if (!currencySymbols.Any(stringToCheck => stringToCheck.Contains(trans.Currency.ToString())))
+            {
+                valMsg = "Amount is not in a decimal format.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //DateTime is Null, Empty, Or whitespace
+            if (string.IsNullOrWhiteSpace(trans.TransDate.ToString()) || string.IsNullOrEmpty(trans.TransDate.ToString()))
+            {
+                valMsg = "Date is blank or empty.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //DateTime is not in decimal format
+            if (!System.DateTime.TryParseExact(trans.TransDate.ToString(), "dd/MM/yyyy hh:mm:ss", null, DateTimeStyles.None, out _))
+            {
+                valMsg = "Amount is not in a correct DateTime format. (dd/MM/yyyy hh:mm:ss)";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+
+            //Status is Null, Empty, Or whitespace
+            if (string.IsNullOrWhiteSpace(trans.Status.ToString()) || string.IsNullOrEmpty(trans.Status.ToString()))
+            {
+                valMsg = "Date is blank or empty.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //Status is invalid
+            if (!Enum.TryParse<CsvStatuses>(trans.Status.ToString(), out _))
+            {
+                valMsg = "Status is invalid or not defined for CSV Statuses.";
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+
+
             return (hasValidation, validations);
         }
 
