@@ -101,7 +101,7 @@
                 /(\.csv|\.xml)$/i;
 
             if (!allowedExtensions.exec(filePath)) {
-                $('#fileExtValidation').text('File type is invalid.')
+                $('#fileExtValidation').text('Unknown Format')
                 $('#btnFilter').prop('disabled', true);
                 return false;
             } else {
