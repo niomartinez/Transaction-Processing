@@ -31,6 +31,8 @@ namespace TransactionsWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<ILogger, Logger>();
+            services.AddTransient<ICsvHandler, CsvHandler>();
+            services.AddTransient<IXmlHandler, XmlHandler>();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
