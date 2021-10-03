@@ -4,22 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Transactions Service</h1>
-
-@using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    <label>Browse File</label>
-    <input type="file" name="file"/>
-    <span style="display: block; margin-top: 5px; color: gray; font-size: 10px;">(Note: Max file size is 1 MB. File extension should be csv or xml only.)</span>
-    <button type="submit" name="btnFilter" id="btnFilter" value="1" class="btn btn-default" style="margin: 5px 0;">Upload</button>
-
-    if (ViewBag.ValidationMessageForAttachment != null)
-    {
-        <div id="divMsgAtt">
-            <span class="field-validation-error text-danger">@ViewBag.ValidationMessageForAttachment</span>
-        </div>
-    }
-}
+<h1>Transactions</h1>
 <table class="table">
     <thead>
         <tr>
@@ -60,12 +45,69 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Status)
                 </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.TransIdentifier">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.TransIdentifier">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.TransIdentifier">Delete</a>
-                </td>
             </tr>
         }
     </tbody>
 </table>
+@using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <h3>Browse File</h3>
+    <input type="file" name="file" id="fileUpload" class="form-control-file" accept=".csv, .xml" />
+    <span style="display: block; margin-top: 5px; color: gray; font-size: 15px;">(Note: Max file size is 1 MB. File extension should be csv or xml only.)</span>
+    <button type="submit" name="btnFilter" id="btnFilter" value="1" class="btn btn-outline-success" style="margin: 5px 0;">Upload</button>
+
+    <p id="fileSizeValidation" class="alert-danger"></p>
+
+    <p id="fileExtValidation" class="alert-danger"></p>
+
+}
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $("#fileUpload").on('change', function () {
+                setUploadButtonState();
+                fileValidation();
+            });
+        });
+        function setUploadButtonState() {
+
+            var maxFileSize = 1024 * 1024; // 1024 bytes * 1024 bytes = 1MB
+            var fileUpload = $('#fileUpload');
+
+            if (fileUpload.val() == '') {
+                return false;
+            }
+            else {
+                if (fileUpload[0].files[0].size < maxFileSize) {
+                    $('#btnFilter').prop('disabled', false);
+                    $('#fileSizeValidation').text('')
+                    return true;
+                } else {
+                    $('#fileSizeValidation').text('File size exceed maximum allowed of 1MB')
+                    $('#btnFilter').prop('disabled', true);
+                    return false;
+                }
+            }
+        }
+        function fileValidation() {
+            var fileInput =
+                document.getElementById('fileUpload');
+
+            var filePath = fileInput.value;
+
+            // Allowing file type
+            var allowedExtensions =
+                /(\.csv|\.xml)$/i;
+
+            if (!allowedExtensions.exec(filePath)) {
+                $('#fileExtValidation').text('File type is invalid.')
+                $('#btnFilter').prop('disabled', true);
+                return false;
+            } else {
+                $('#fileExtValidation').text('')
+                $('#btnFilter').prop('disabled', false);
+            }
+        }
+    </script>
+}

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TransactionsWebApp.Data;
+using TransactionsWebApp.Data.Repositories;
 using TransactionsWebApp.Helpers.LogService;
 using TransactionsWebApp.Helpers.Utilities;
 
@@ -40,6 +41,8 @@ namespace TransactionsWebApp
             services.AddControllersWithViews();
 
             services.Configure<AppSettingsModel>(Configuration.GetSection("ApplicationSettings"));
+
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,29 +3,33 @@ using CsvHelper.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Transaction_Processing.Models;
 using TransactionsWebApp.Data;
+using TransactionsWebApp.Data.Repositories;
 using TransactionsWebApp.Helpers.ClassMappers;
 using TransactionsWebApp.Helpers.LogService;
-using Newtonsoft.Json;
 
 namespace TransactionsWebApp.Controllers
 {
     public class TransactionsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITransactionRepository _transRepo;
         private readonly ILogger _logger;
 
-        public TransactionsController(ApplicationDbContext context, ILogger logger)
+        public TransactionsController(ApplicationDbContext context, ILogger logger, ITransactionRepository transRepo)
         {
             _context = context;
             _logger = logger;
+            _transRepo = transRepo;
         }
 
         // GET: Transactions
@@ -53,18 +57,21 @@ namespace TransactionsWebApp.Controllers
             }
             #endregion
 
-            //Validate File columns per row
+            //Validate File per record
             int counter = 1;
+            List<List<string>> validations = new();
             foreach (Transaction trans in transactions)
             {
-                bool fileHasValidation = false;
-                
-                if (!ValidateTransaction(trans, file, counter).Item1)
+                if (ValidateTransaction(trans, file, counter).Item1)
                 {
-                    fileHasValidation = false;
-                    
+                    validations.Add(ValidateTransaction(trans, file, counter).Item2);
                 }
-                if (fileHasValidation)
+                counter++;
+            }
+            
+            if (validations.Count<=0)// file has no validations
+            {
+                foreach (Transaction trans in transactions)
                 {
                     Transaction transactionModel = new()
                     {
@@ -79,17 +86,28 @@ namespace TransactionsWebApp.Controllers
                     {
                         _context.Add(transactionModel);
                         await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
                     }
-                    return View("Index", await _context.Transaction.ToListAsync());
                 }
-                
 
-                counter++;
+                return RedirectToAction("Index");
             }
+            else
+            {
+                string valMsg = "Bad Request: CSV Validation(s) below: " + Environment.NewLine;
+                foreach (List<string> list in validations)
+                {
+                    foreach (string s in list)
+                    {
+                        valMsg += s;
+                    }
+                    valMsg += Environment.NewLine;
+                }
+                valMsg += "Refer to application logs for more details. (C:\\Users\\{UserName}\\Documents\\TransactionServiceLogs)" + Environment.NewLine;
+                return BadRequest(error: valMsg);
+            }
+
             //if no validations return http 200 and insert to DB
             //if has validations list validations and note file name to a log file and display validations on bad request
-            return View("Index", await _context.Transaction.ToListAsync());
         }
         #region Validate CSV Records
         public (bool, List<string>) ValidateTransaction(Transaction trans, IFormFile file, int counter)
@@ -100,7 +118,17 @@ namespace TransactionsWebApp.Controllers
             //TransIdentifier is Null, Empty, Or whitespace
             if (string.IsNullOrWhiteSpace(trans.TransIdentifier.ToString()) || string.IsNullOrEmpty(trans.TransIdentifier.ToString()))
             {
-                valMsg = "Transaction Identifier is blank or empty.";
+                valMsg = "Transaction Identifier is blank or empty." + Environment.NewLine;
+                Log(trans, valMsg, file, counter);
+                validations.Add(valMsg);
+                hasValidation = true;
+            }
+            //TransIdentifier Exists
+            Expression<Func<Transaction, bool>> filter = (e) => e.TransIdentifier == trans.TransIdentifier;
+            var opp = _transRepo.RetrieveAll();
+            if (opp.Count != 0)
+            {
+                valMsg = "Record already exists: " +trans.TransIdentifier.ToString() + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -108,7 +136,7 @@ namespace TransactionsWebApp.Controllers
             //TransIdentifier char is > 50
             if (trans.TransIdentifier.ToString().Length > 50)
             {
-                valMsg = "Transaction Identifier exceeded maximum of 50 characters.";
+                valMsg = "Transaction Identifier exceeded maximum of 50 characters." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -116,7 +144,7 @@ namespace TransactionsWebApp.Controllers
             //Amount is Null, Empty, Or whitespace
             if (string.IsNullOrWhiteSpace(trans.Amount.ToString()) || string.IsNullOrEmpty(trans.Amount.ToString()))
             {
-                valMsg = "Amount is blank or empty.";
+                valMsg = "Amount is blank or empty." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -124,7 +152,7 @@ namespace TransactionsWebApp.Controllers
             //Amount is not in decimal format
             if (!decimal.TryParse(trans.Amount.ToString(), out _))
             {
-                valMsg = "Amount is not in a decimal format.";
+                valMsg = "Amount is not in a decimal format." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -132,7 +160,7 @@ namespace TransactionsWebApp.Controllers
             //Currency is Null, Empty, Or whitespace
             if (string.IsNullOrWhiteSpace(trans.Currency.ToString()) || string.IsNullOrEmpty(trans.Currency.ToString()))
             {
-                valMsg = "Currency is blank or empty.";
+                valMsg = "Currency is blank or empty." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -145,7 +173,7 @@ namespace TransactionsWebApp.Controllers
 
             if (!currencySymbols.Any(stringToCheck => stringToCheck.Contains(trans.Currency.ToString())))
             {
-                valMsg = "Amount is not in a decimal format.";
+                valMsg = "Currency is not in ISO2417 Format." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -153,7 +181,7 @@ namespace TransactionsWebApp.Controllers
             //DateTime is Null, Empty, Or whitespace
             if (string.IsNullOrWhiteSpace(trans.TransDate.ToString()) || string.IsNullOrEmpty(trans.TransDate.ToString()))
             {
-                valMsg = "Date is blank or empty.";
+                valMsg = "Transaction Date is blank or empty." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -161,7 +189,7 @@ namespace TransactionsWebApp.Controllers
             //DateTime is not in decimal format
             if (!System.DateTime.TryParseExact(trans.TransDate.ToString(), "dd/MM/yyyy hh:mm:ss", null, DateTimeStyles.None, out _))
             {
-                valMsg = "Amount is not in a correct DateTime format. (dd/MM/yyyy hh:mm:ss)";
+                valMsg = "Transaction Date is not in a correct DateTime format. (dd/MM/yyyy hh:mm:ss)" + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -170,7 +198,7 @@ namespace TransactionsWebApp.Controllers
             //Status is Null, Empty, Or whitespace
             if (string.IsNullOrWhiteSpace(trans.Status.ToString()) || string.IsNullOrEmpty(trans.Status.ToString()))
             {
-                valMsg = "Date is blank or empty.";
+                valMsg = "Date is blank or empty." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -178,7 +206,7 @@ namespace TransactionsWebApp.Controllers
             //Status is invalid
             if (!Enum.TryParse<CsvStatuses>(trans.Status.ToString(), out _))
             {
-                valMsg = "Status is invalid or not defined for CSV Statuses.";
+                valMsg = "Status is invalid or not defined for CSV Statuses." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;

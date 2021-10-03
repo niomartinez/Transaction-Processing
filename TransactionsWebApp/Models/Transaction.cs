@@ -11,16 +11,14 @@ namespace Transaction_Processing.Models
     {
         [Key]
         [Required]
-        [StringLength(50, ErrorMessage = "Maximum length is 50")]
+        [Display(Name = "Transaction Identifier")]
         public string TransIdentifier { get; set; }
-        public decimal Amount { get; set; }
-        [DataType(DataType.Currency)]
+        public string Amount { get; set; }
         [Required]
-        [Range(3,3)]
         public string Currency { get; set; }
         [Required]
+        [Display(Name = "Transaction Date")]
         public string TransDate { get; set; }
-
         [Required]
         public string Status { get; set; }
 
