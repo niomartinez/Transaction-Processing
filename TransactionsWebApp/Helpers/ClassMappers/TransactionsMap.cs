@@ -12,7 +12,7 @@ namespace TransactionsWebApp.Helpers.ClassMappers
             Map(m => m.TransIdentifier).TypeConverter<StringTypeConverter<String>>();
             Map(m => m.Amount).TypeConverter<DecimalTypeConverter<Decimal>>();
             Map(m => m.Currency).TypeConverter<StringTypeConverter<String>>();
-            Map(m => m.TransDate).TypeConverter<StringTypeConverter<String>>();
+            Map(m => m.TransDate).TypeConverter<DateTimeTypeConverter<String>>();
             Map(m => m.Status).TypeConverter<StringTypeConverter<String>>();
         }
     }

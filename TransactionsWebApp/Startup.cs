@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TransactionsWebApp.Data;
+using TransactionsWebApp.Helpers.LogService;
 using TransactionsWebApp.Helpers.Utilities;
 
 namespace TransactionsWebApp
@@ -28,6 +29,7 @@ namespace TransactionsWebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<ILogger, Logger>();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -66,7 +68,7 @@ namespace TransactionsWebApp
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Transactions}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
         }

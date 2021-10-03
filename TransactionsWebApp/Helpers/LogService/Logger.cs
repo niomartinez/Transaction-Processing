@@ -8,7 +8,7 @@ using TransactionsWebApp.Helpers.Utilities;
 
 namespace TransactionsWebApp.Helpers.LogService
 {
-    public class Logger
+    public class Logger : ILogger
     {
 
         private readonly IOptions<AppSettingsModel> _settings;

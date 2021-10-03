@@ -4,13 +4,12 @@ using CsvHelper.TypeConversion;
 
 namespace TransactionsWebApp.Helpers.TypeConverters
 {
-    public class DateTimeTypeConverter<DateTime> : DefaultTypeConverter
+    public class DateTimeTypeConverter<String> : DefaultTypeConverter
     {
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
             string s = text.Replace("\"", "");
-            System.DateTime date = System.DateTime.ParseExact(s, "dd/MM/yyyy hh:mm:ss", null);
-            return date;
+            return s;
         }
 
         public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)

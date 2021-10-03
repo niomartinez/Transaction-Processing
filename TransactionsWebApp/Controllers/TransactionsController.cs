@@ -20,10 +20,11 @@ namespace TransactionsWebApp.Controllers
     public class TransactionsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        readonly Logger _logger;
+        private readonly ILogger _logger;
 
-        public TransactionsController(ILogger logger)
+        public TransactionsController(ApplicationDbContext context, ILogger logger)
         {
+            _context = context;
             _logger = logger;
         }
 
@@ -33,7 +34,7 @@ namespace TransactionsWebApp.Controllers
             return View(await _context.Transaction.ToListAsync());
         }
 
-        public IActionResult UploadFile(IFormFile file, Transaction transactionModel)
+        public async Task<IActionResult> UploadFile(IFormFile file)
         {
             List<Transaction> transactions = new();
             //read File
@@ -41,7 +42,8 @@ namespace TransactionsWebApp.Controllers
             var path = file.OpenReadStream();
             CsvConfiguration csvConfiguration = new(CultureInfo.InvariantCulture)
             {
-                HasHeaderRecord = false, Delimiter = ","
+                HasHeaderRecord = false,
+                Delimiter = ","
             };
             using (var reader = new StreamReader(path))
             using (var csv = new CsvReader(reader, csvConfiguration))
@@ -55,18 +57,39 @@ namespace TransactionsWebApp.Controllers
             int counter = 1;
             foreach (Transaction trans in transactions)
             {
+                bool fileHasValidation = false;
+                
+                if (!ValidateTransaction(trans, file, counter).Item1)
+                {
+                    fileHasValidation = false;
+                    
+                }
+                if (fileHasValidation)
+                {
+                    Transaction transactionModel = new()
+                    {
+                        TransIdentifier = trans.TransIdentifier,
+                        Amount = trans.Amount,
+                        Currency = trans.Currency,
+                        TransDate = trans.TransDate,
+                        Status = trans.Status
 
-                ValidateTransaction(trans, file,  counter);
-                //transactionModel.TransIdentifier = trans.TransIdentifier;
-                //transactionModel.Amount = trans.Amount;
-                //transactionModel.Currency = trans.Currency;
-                //transactionModel.TransDate = trans.TransDate;
-                //transactionModel.Status = trans.Status;
+                    };
+                    if (ModelState.IsValid)
+                    {
+                        _context.Add(transactionModel);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
+                    return View("Index", await _context.Transaction.ToListAsync());
+                }
+                
+
                 counter++;
             }
             //if no validations return http 200 and insert to DB
             //if has validations list validations and note file name to a log file and display validations on bad request
-            return View();
+            return View("Index", await _context.Transaction.ToListAsync());
         }
         #region Validate CSV Records
         public (bool, List<string>) ValidateTransaction(Transaction trans, IFormFile file, int counter)
