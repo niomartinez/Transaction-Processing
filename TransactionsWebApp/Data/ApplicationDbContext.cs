@@ -13,6 +13,6 @@ namespace TransactionsWebApp.Data
             : base(options)
         {
         }
-        public DbSet<Transaction_Processing.Models.Transaction> Transaction { get; set; }
+        public DbSet<Transaction_Processing.Models.TransactionCsv> Transaction { get; set; }
     }
 }

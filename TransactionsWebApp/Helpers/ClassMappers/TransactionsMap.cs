@@ -5,7 +5,7 @@ using TransactionsWebApp.Helpers.TypeConverters;
 
 namespace TransactionsWebApp.Helpers.ClassMappers
 {
-    public class TransactionsMap : ClassMap<Transaction>
+    public class TransactionsMap : ClassMap<TransactionCsv>
     {
         public TransactionsMap()
         {

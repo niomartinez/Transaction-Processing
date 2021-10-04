@@ -6,7 +6,7 @@ using Transaction_Processing.Models;
 
 namespace TransactionsWebApp.Data.Repositories
 {
-    public class TransactionRepository : RepositoryBase<Transaction, Int32>, ITransactionRepository
+    public class TransactionRepository : RepositoryBase<TransactionCsv, Int32>, ITransactionRepository
     {
         public TransactionRepository(ApplicationDbContext context) : base(context)
         {
