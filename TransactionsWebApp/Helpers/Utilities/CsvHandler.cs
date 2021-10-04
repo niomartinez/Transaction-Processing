@@ -180,7 +180,7 @@ namespace TransactionsWebApp.Helpers.Utilities
                 hasValidation = true;
             }
             //DateTime is not in decimal format
-            if (!System.DateTime.TryParseExact(trans.TransDate.ToString(), "dd/MM/yyyy hh:mm:ss", null, DateTimeStyles.None, out _))
+            if (!System.DateTime.TryParseExact(trans.TransDate.ToString(), "G", null, DateTimeStyles.None, out _))
             {
                 valMsg = "Transaction Date is not in a correct DateTime format. (dd/MM/yyyy hh:mm:ss)" + Environment.NewLine;
                 Log(trans, valMsg, file, counter);

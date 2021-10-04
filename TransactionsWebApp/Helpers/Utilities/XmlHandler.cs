@@ -123,7 +123,7 @@ namespace TransactionsWebApp.Helpers.Utilities
                 validations.Add(valMsg);
                 hasValidation = true;
             }
-            //TransIdentifier Exists
+            //TransIdentifier Exists in DB
             Expression<Func<TransactionCsv, bool>> filter = (e) => e.TransIdentifier == trans.Id;
             var opp = _transRepo.RetrieveAll(filter);
             if (opp.Count != 0)
@@ -187,9 +187,9 @@ namespace TransactionsWebApp.Helpers.Utilities
                 hasValidation = true;
             }
             //DateTime is not in decimal format
-            if (!System.DateTime.TryParseExact(trans.TransactionDate.ToString(), "dd/MM/yyyy hh:mm:ss", null, DateTimeStyles.None, out _))
+            if (!System.DateTime.TryParseExact(trans.TransactionDate.ToString(), "s", null, DateTimeStyles.None, out _))
             {
-                valMsg = "Transaction Date is not in a correct DateTime format. (dd/MM/yyyy hh:mm:ss)" + Environment.NewLine;
+                valMsg = "Transaction Date is not in a correct DateTime format. (yyyy-MM-ddThh:mm:ss)" + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
@@ -204,15 +204,13 @@ namespace TransactionsWebApp.Helpers.Utilities
                 hasValidation = true;
             }
             //Status is invalid
-            if (!Enum.TryParse<CsvStatuses>(trans.Status.ToString(), out _))
+            if (!Enum.TryParse<XmlStatuses>(trans.Status.ToString(), out _))
             {
-                valMsg = "Status is invalid or not defined for CSV Statuses." + Environment.NewLine;
+                valMsg = "Status is invalid or not defined for XML Statuses." + Environment.NewLine;
                 Log(trans, valMsg, file, counter);
                 validations.Add(valMsg);
                 hasValidation = true;
             }
-
-
             return (hasValidation, validations);
             #endregion
         }
