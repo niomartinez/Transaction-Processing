@@ -1,11 +1,11 @@
-﻿@model IEnumerable<Transaction_Processing.Models.TransactionCsv>
+﻿@model IEnumerable<Transaction_Processing.Models.BaseTransaction>
 
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Transactions</h1>
-<table class="table">
+<table class="table" style="overflow:auto" height="400">
     <thead>
         <tr>
             <th>
@@ -49,15 +49,14 @@
         }
     </tbody>
 </table>
-@using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { name ="form", id = "form", enctype = "multipart/form-data" }))
 {
     <h3>Browse File</h3>
     <input type="file" name="file" id="fileUpload" class="form-control-file" accept=".csv, .xml" />
     <span style="display: block; margin-top: 5px; color: gray; font-size: 15px;">(Note: Max file size is 1 MB. File extension should be csv or xml only.)</span>
     <button type="submit" name="btnFilter" id="btnFilter" value="1" class="btn btn-outline-success" style="margin: 5px 0;">Upload</button>
-
+    <p class="text-success">@ViewBag.UploadSuccess</p>
     <p id="fileSizeValidation" class="alert-danger"></p>
-
     <p id="fileExtValidation" class="alert-danger"></p>
 
 }

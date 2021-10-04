@@ -72,7 +72,6 @@ namespace TransactionsWebApp.Controllers
                 }
                 if (re.Any())
                 {
-                    //map data to resultModel
                     return Ok(resModel);
                 }
                 return NotFound();
@@ -86,10 +85,12 @@ namespace TransactionsWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
+            ViewBag.UploadSuccess = null;
             (bool, string) res = await ProcessFile(file);
 
             if (res.Item1)
             {
+                ViewBag.UploadSuccess = "Upload Successful";
                 return RedirectToAction("Index");
             }
             else
