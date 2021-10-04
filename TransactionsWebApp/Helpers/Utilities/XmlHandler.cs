@@ -62,7 +62,7 @@ namespace TransactionsWebApp.Helpers.Utilities
                 int index = 0;
                 foreach (Transaction trans in transactions.Transaction)
                 {
-                    TransactionCsv transactionModel = new()
+                    BaseTransaction transactionModel = new()
                     {
                         TransIdentifier = trans.Id,
                         Amount = trans.PaymentDetails.Amount,
@@ -124,7 +124,7 @@ namespace TransactionsWebApp.Helpers.Utilities
                 hasValidation = true;
             }
             //TransIdentifier Exists in DB
-            Expression<Func<TransactionCsv, bool>> filter = (e) => e.TransIdentifier == trans.Id;
+            Expression<Func<BaseTransaction, bool>> filter = (e) => e.TransIdentifier == trans.Id;
             var opp = _transRepo.RetrieveAll(filter);
             if (opp.Count != 0)
             {

@@ -33,7 +33,7 @@ namespace Transaction_Processing.Models
         public List<Transaction> Transaction { get; set; }
     }
 
-    public class TransactionCsv
+    public class BaseTransaction
     {
         [Key]
         [Required]
@@ -48,7 +48,7 @@ namespace Transaction_Processing.Models
         [Required]
         public string Status { get; set; }
 
-        public TransactionCsv()
+        public BaseTransaction()
         {
 
         }

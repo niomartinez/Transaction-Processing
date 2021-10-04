@@ -8,7 +8,7 @@ namespace TransactionsWebApp.Helpers.Utilities
     public interface ICsvHandler
     {
         public Task<(bool, string)> ProcessCsvAsync(IFormFile file);
-        public (bool, List<string>) ValidateTransaction(TransactionCsv trans, IFormFile file, int counter);
-        public void Log(TransactionCsv trans, string valMsg, IFormFile file, int counter);
+        public (bool, List<string>) ValidateTransaction(BaseTransaction trans, IFormFile file, int counter);
+        public void Log(BaseTransaction trans, string valMsg, IFormFile file, int counter);
     }
 }

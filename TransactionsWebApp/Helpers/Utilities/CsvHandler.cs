@@ -32,7 +32,7 @@ namespace TransactionsWebApp.Helpers.Utilities
         }
         public async Task<(bool,string)> ProcessCsvAsync(IFormFile file)
         {
-            List<TransactionCsv> transactions = new();
+            List<BaseTransaction> transactions = new();
 
             //read File
             #region Read CSV
@@ -46,14 +46,14 @@ namespace TransactionsWebApp.Helpers.Utilities
             using (var csv = new CsvReader(reader, csvConfiguration))
             {
                 csv.Context.RegisterClassMap<TransactionsMap>();
-                transactions = csv.GetRecords<TransactionCsv>().ToList();
+                transactions = csv.GetRecords<BaseTransaction>().ToList();
             }
             #endregion
             //Validate File per record
             #region Validate CSV per Record
             int counter = 1;
             List<List<string>> validations = new();
-            foreach (TransactionCsv trans in transactions)
+            foreach (BaseTransaction trans in transactions)
             {
                 if (ValidateTransaction(trans, file, counter).Item1)
                 {
@@ -66,9 +66,9 @@ namespace TransactionsWebApp.Helpers.Utilities
             #region No Validations
             if (validations.Count <= 0)// file has no validations
             {
-                foreach (TransactionCsv trans in transactions)
+                foreach (BaseTransaction trans in transactions)
                 {
-                    TransactionCsv transactionModel = new()
+                    BaseTransaction transactionModel = new()
                     {
                         TransIdentifier = trans.TransIdentifier,
                         Amount = trans.Amount,
@@ -102,7 +102,7 @@ namespace TransactionsWebApp.Helpers.Utilities
             #endregion
         }
 
-        public (bool, List<string>) ValidateTransaction(TransactionCsv trans, IFormFile file, int counter)
+        public (bool, List<string>) ValidateTransaction(BaseTransaction trans, IFormFile file, int counter)
         {
             #region Record validation method
             List<string> validations = new();
@@ -117,7 +117,7 @@ namespace TransactionsWebApp.Helpers.Utilities
                 hasValidation = true;
             }
             //TransIdentifier Exists
-            Expression<Func<TransactionCsv, bool>> filter = (e) => e.TransIdentifier == trans.TransIdentifier;
+            Expression<Func<BaseTransaction, bool>> filter = (e) => e.TransIdentifier == trans.TransIdentifier;
             var opp = _transRepo.RetrieveAll(filter);
             if (opp.Count != 0)
             {
@@ -210,7 +210,7 @@ namespace TransactionsWebApp.Helpers.Utilities
             #endregion
         }
 
-        public void Log(TransactionCsv trans, string valMsg, IFormFile file, int counter)
+        public void Log(BaseTransaction trans, string valMsg, IFormFile file, int counter)
         {
             #region Logging
             _logger.Log("Invalid Record from File " + file.FileName + ": " + Environment.NewLine +
