@@ -1,9 +1,45 @@
-﻿@{
-    ViewData["Title"] = "About this service";
-}
-<h1>@ViewData["Title"]</h1>
-
-<p>This web servise was developed as Technical Assignment for a Job Application.</p>
-<p>Technologies used are: .NET Core 5.0, Entity Framework, MSSQL, Javascript</p>
-<p>Methodologies used are: MVC, Singleton, Dependency Injection, LinQ, Interfaces, Abstraction, Polymorphism, Inheritance</p>
-<p>Tools and Libraries Used: CsvHelper, GitHub, MSSMS</p>
+﻿<p><strong>This web service was developed as Technical Assignment for a Job Application.</strong></p>
+<p>API Calls URL sample pattern: (<em>add and specify parameters and values</em>)</p>
+<p><em>&nbsp;{baseurl}/{Controller}/{Search}?currency=xxx</em></p>
+<p><strong>Examples:&nbsp;</strong></p>
+<ul>
+    <li style="text-align: left;">https://localhost:44335/<strong>Transactions?start=20-02-2019&amp;end=21-02-2019</strong></li>
+    <li style="text-align: left;">https://localhost:44335/Transactions?<strong>currency=php&amp;status=approved</strong></li>
+    <li style="text-align: left;">https://localhost:44335/Transactions?<strong>currency=php&amp;status=approved&amp;start=20-02-2019&amp;end=21-02-2019</strong></li>
+</ul>
+<p><strong>Parameters:</strong></p>
+<ul>
+    <li>currency</li>
+    <li>start</li>
+    <li>end</li>
+    <li>status</li>
+</ul>
+<p style="text-align: center;">&nbsp;</p>
+<p><strong>Technologies used:</strong></p>
+<ul>
+    <li>.NET Core 5.0</li>
+    <li>Entity Framework</li>
+    <li>MsSql&nbsp;(see SQL Script if preferred)</li>
+    <li>Javascript</li>
+    <li>Jquery</li>
+    <li>Migrations ORM (See Migrations scripts in project if preferred)</li>
+</ul>
+<p><strong>Design Patterns used: </strong></p>
+<ul>
+    <li>MVC</li>
+    <li>Dependency Injection</li>
+    <li>RESTful API</li>
+</ul>
+<p><strong>Other Technologies used:</strong></p>
+<ul>
+    <li>LinQ</li>
+    <li>Interfaces and Abstraction</li>
+    <li>Inheritance</li>
+</ul>
+<p><strong>Tools and Libraries used:</strong></p>
+<ul>
+    <li>CsvHelper: <a href="https://joshclose.github.io/CsvHelper/">https://joshclose.github.io/CsvHelper/</a></li>
+    <li>GitHub: <a href="https://github.com/niomartinez/Transaction-Processing">https://github.com/niomartinez/Transaction-Processing</a></li>
+    <li>MSSMS</li>
+    <li>VS2019 Community</li>
+</ul>

@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Transaction_Processing.Models;
 
 namespace TransactionsWebApp.Data
 {

@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using TransactionsWebApp.Helpers.Utilities;
 
 namespace TransactionsWebApp.Helpers.LogService

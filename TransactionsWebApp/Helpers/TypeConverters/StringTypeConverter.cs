@@ -1,6 +1,6 @@
-﻿using CsvHelper.TypeConversion;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper;
+using CsvHelper.TypeConversion;
 
 namespace TransactionsWebApp.Helpers.TypeConverters
 {

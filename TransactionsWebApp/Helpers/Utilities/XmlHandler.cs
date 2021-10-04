@@ -12,7 +12,6 @@ using Transaction_Processing.Models;
 using TransactionsWebApp.Data;
 using TransactionsWebApp.Data.Repositories;
 using TransactionsWebApp.Helpers.LogService;
-using TransactionsWebApp.Models;
 
 namespace TransactionsWebApp.Helpers.Utilities
 {

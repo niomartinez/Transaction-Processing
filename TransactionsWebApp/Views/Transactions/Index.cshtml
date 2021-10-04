@@ -5,50 +5,55 @@
 }
 
 <h1>Transactions</h1>
-<table class="table" style="overflow:auto" height="400">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TransIdentifier)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Currency)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TransDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TransIdentifier)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Currency)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TransDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Status)
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div id="table-wrapper">
+    <div id="table-scroll">
+        <table class="table" style="overflow:auto" height="400">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TransIdentifier)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Amount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Currency)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TransDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Status)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TransIdentifier)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Currency)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TransDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
 @using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { name ="form", id = "form", enctype = "multipart/form-data" }))
 {
     <h3>Browse File</h3>
