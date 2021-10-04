@@ -2,8 +2,8 @@
 {
     public class Result
     {
-        public string id { get; set; }
-        public string payment { get; set; }
-        public string status { get; set; }
+        public string Id { get; set; }
+        public string Payment { get; set; }
+        public string Status { get; set; }
     }
 }

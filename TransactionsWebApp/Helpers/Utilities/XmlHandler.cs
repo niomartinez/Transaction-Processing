@@ -34,7 +34,7 @@ namespace TransactionsWebApp.Helpers.Utilities
         {
             Transactions transactions = new();//object that is a list of transactions
             //string xml = File.ReadAllText(await GetTempFilePath(file));//returns string from xml file
-            XmlSerializer xs = new XmlSerializer(typeof(Transactions));
+            XmlSerializer xs = new(typeof(Transactions));
             //read File
             #region Read XML
             using (FileStream stream = File.Open(await GetTempFilePath(file), FileMode.Open))

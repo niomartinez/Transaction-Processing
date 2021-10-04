@@ -62,11 +62,11 @@ namespace TransactionsWebApp.Controllers
                     {
                         outStatus = "D";
                     }
-                    Result resMod = new Result()
+                    Result resMod = new()
                     {
-                        id = trans.TransIdentifier.ToString(),
-                        payment = trans.Amount.ToString() + " " + trans.Currency.ToString(),
-                        status = outStatus
+                        Id = trans.TransIdentifier.ToString(),
+                        Payment = trans.Amount.ToString() + " " + trans.Currency.ToString(),
+                        Status = outStatus
                     };
                     resModel.Add(resMod);
                 }
