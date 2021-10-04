@@ -1,0 +1,117 @@
+﻿@model IEnumerable<Transaction_Processing.Models.BaseTransaction>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Transactions</h1>
+<div id="table-wrapper">
+    <div id="table-scroll">
+        <table class="table" style="overflow:auto" height="400">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TransIdentifier)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Amount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Currency)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TransDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Status)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TransIdentifier)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Currency)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TransDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@using (Html.BeginForm("UploadFile", "Transactions", FormMethod.Post, new { name ="form", id = "form", enctype = "multipart/form-data" }))
+{
+    <h3>Browse File</h3>
+    <input type="file" name="file" id="fileUpload" class="form-control-file" accept=".csv, .xml" />
+    <span style="display: block; margin-top: 5px; color: gray; font-size: 15px;">(Note: Max file size is 1 MB. File extension should be csv or xml only.)</span>
+    <button type="submit" name="btnFilter" id="btnFilter" value="1" class="btn btn-outline-success" style="margin: 5px 0;">Upload</button>
+    <p class="text-success">@ViewBag.UploadSuccess</p>
+    <p id="fileSizeValidation" class="alert-danger"></p>
+    <p id="fileExtValidation" class="alert-danger"></p>
+
+}
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $("#fileUpload").on('change', function () {
+                setUploadButtonState();
+                fileValidation();
+            });
+        });
+        function setUploadButtonState() {
+
+            var maxFileSize = 1024 * 1024; // 1024 bytes * 1024 bytes = 1MB
+            var fileUpload = $('#fileUpload');
+
+            if (fileUpload.val() == '') {
+                return false;
+            }
+            else {
+                if (fileUpload[0].files[0].size < maxFileSize) {
+                    $('#btnFilter').prop('disabled', false);
+                    $('#fileSizeValidation').text('')
+                    return true;
+                } else {
+                    $('#fileSizeValidation').text('File size exceed maximum allowed of 1MB')
+                    $('#btnFilter').prop('disabled', true);
+                    return false;
+                }
+            }
+        }
+        function fileValidation() {
+            var fileInput =
+                document.getElementById('fileUpload');
+
+            var filePath = fileInput.value;
+
+            // Allowing file type
+            var allowedExtensions =
+                /(\.csv|\.xml)$/i;
+
+            if (!allowedExtensions.exec(filePath)) {
+                $('#fileExtValidation').text('Unknown Format')
+                $('#btnFilter').prop('disabled', true);
+                return false;
+            } else {
+                $('#fileExtValidation').text('')
+                $('#btnFilter').prop('disabled', false);
+            }
+        }
+    </script>
+}
